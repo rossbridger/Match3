@@ -1,9 +1,10 @@
-[gd_scene load_steps=2 format=3 uid="uid://dnwvabpl3x175"]
+[gd_scene load_steps=3 format=3 uid="uid://dnwvabpl3x175"]
 
+[ext_resource type="PackedScene" uid="uid://4h6wy8jxlaxh" path="res://scenes/piece.tscn" id="1_cdnre"]
 [ext_resource type="Texture2D" uid="uid://bwwi4y2vcpsly" path="res://assets/Pieces/Pink Piece.png" id="1_jfrh0"]
 
-[node name="Piece" type="Node2D"]
+[node name="Piece" instance=ExtResource("1_cdnre")]
+color = 4
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
-scale = Vector2(0.5, 0.5)
+[node name="Sprite2D" parent="." index="0"]
 texture = ExtResource("1_jfrh0")
