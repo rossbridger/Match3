@@ -39,7 +39,9 @@ func pixel_to_grid(pixel_x, pixel_y):
 	var new_y = round((pixel_y - y_start)/-offset)
 	return Vector2(new_x, new_y)
 	
-func is_in_grid(column, row) -> bool:
+func is_in_grid(grid_position: Vector2) -> bool:
+	var column = grid_position.x
+	var row = grid_position.y
 	if column >= 0 && column < width:
 		if row >= 0 && row < height:
 			return true
@@ -74,27 +76,22 @@ func match_at(i: int, j: int, color: PieceColor.PieceColor) -> bool:
 
 func touch_input():
 	if Input.is_action_just_pressed("ui_touch"):
-		first_touch = get_global_mouse_position()
-		var grid_position = pixel_to_grid(first_touch.x, first_touch.y)
-		if is_in_grid(grid_position.x, grid_position.y):
+		var grid_position = pixel_to_grid(get_global_mouse_position().x, get_global_mouse_position().y)
+		if is_in_grid(grid_position):
+			first_touch = grid_position
 			controlling = true
 	if Input.is_action_just_released("ui_touch"):
-		final_touch = get_global_mouse_position()
-		var grid_position = pixel_to_grid(final_touch.x, final_touch.y)
-		if is_in_grid(grid_position.x, grid_position.y) && controlling:
-			touch_difference(pixel_to_grid(first_touch.x, first_touch.y), grid_position)
-			controlling = false
+		var grid_position = pixel_to_grid(get_global_mouse_position().x, get_global_mouse_position().y)
+		if is_in_grid(grid_position) && controlling:
+			final_touch = grid_position
+			touch_difference(first_touch, final_touch)
+		controlling = false
 
 func swap_pieces(column, row, direction):
 	var first_piece: Piece = all_pieces[column][row]
 	var other_piece: Piece = all_pieces[column + direction.x][row + direction.y]
 	all_pieces[column][row] = other_piece
 	all_pieces[column + direction.x][row + direction.y] = first_piece
-	#first_piece.position = grid_to_pixel(column + direction.x, row + direction.y)
-	#other_piece.position = grid_to_pixel(column, row)
-	#var new_position = first_piece.position
-	#first_piece.position = other_piece.position
-	#other_piece.position = new_position
 	first_piece.move(grid_to_pixel(column + direction.x, row + direction.y))
 	other_piece.move(grid_to_pixel(column, row))
 	find_matches()
