@@ -31,3 +31,14 @@ texture = ExtResource("3_xxkr4")
 x_start = 64
 y_start = 800
 offset = 64
+
+[node name="DestroyTimer" type="Timer" parent="."]
+wait_time = 0.5
+one_shot = true
+
+[node name="CollapseTimer" type="Timer" parent="."]
+wait_time = 0.5
+one_shot = true
+
+[connection signal="timeout" from="DestroyTimer" to="Grid" method="_on_destroy_timer_timeout"]
+[connection signal="timeout" from="CollapseTimer" to="Grid" method="_on_collapse_timer_timeout"]

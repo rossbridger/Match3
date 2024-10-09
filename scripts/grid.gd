@@ -90,11 +90,12 @@ func touch_input():
 func swap_pieces(column, row, direction):
 	var first_piece: Piece = all_pieces[column][row]
 	var other_piece: Piece = all_pieces[column + direction.x][row + direction.y]
-	all_pieces[column][row] = other_piece
-	all_pieces[column + direction.x][row + direction.y] = first_piece
-	first_piece.move(grid_to_pixel(column + direction.x, row + direction.y))
-	other_piece.move(grid_to_pixel(column, row))
-	find_matches()
+	if first_piece != null && other_piece != null:
+		all_pieces[column][row] = other_piece
+		all_pieces[column + direction.x][row + direction.y] = first_piece
+		first_piece.move(grid_to_pixel(column + direction.x, row + direction.y))
+		other_piece.move(grid_to_pixel(column, row))
+		find_matches()
 
 func touch_difference(grid_1, grid_2):
 	var difference = grid_2 - grid_1
@@ -134,6 +135,29 @@ func find_matches():
 							all_pieces[i][j].dim()
 							all_pieces[i][j + 1].matched = true
 							all_pieces[i][j + 1].dim()
+	$"../DestroyTimer".start()
+
+func destroy_matched():
+	for i in width:
+		for j in height:
+			if all_pieces[i][j] != null:
+				if all_pieces[i][j].matched:
+					all_pieces[i][j].queue_free()
+					all_pieces[i][j] = null
+					$"../CollapseTimer".start()
+
+func collapse_columns():
+	for i in width:
+		for j in height:
+			if all_pieces[i][j] == null:
+				for k in range(j + 1, height):
+					if all_pieces[i][k] != null:
+						all_pieces[i][k].move(grid_to_pixel(i, j))
+						all_pieces[i][j] = all_pieces[i][k]
+						all_pieces[i][k] = null
+						break
+	# recursively find new matches until no more matches are found
+	find_matches()
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -144,3 +168,10 @@ func _ready() -> void:
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	touch_input()
+
+func _on_destroy_timer_timeout() -> void:
+	destroy_matched()
+
+
+func _on_collapse_timer_timeout() -> void:
+	collapse_columns()
