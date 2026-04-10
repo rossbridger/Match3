@@ -1,23 +1,23 @@
-[gd_scene load_steps=5 format=3 uid="uid://c77kgm6pphk5b"]
+[gd_scene format=3 uid="uid://c77kgm6pphk5b"]
 
 [ext_resource type="Texture2D" uid="uid://cd3niulbn7lsp" path="res://assets/UI/Backgrounds/background 2.png" id="1_x8d5d"]
 [ext_resource type="Texture2D" uid="uid://u1b5hvqgevvu" path="res://assets/UI/Top UI v 2.png" id="2_m87nl"]
 [ext_resource type="Texture2D" uid="uid://muqjgonmbeww" path="res://assets/UI/Bottom UI v 2.png" id="3_xxkr4"]
 [ext_resource type="PackedScene" uid="uid://cv4gihnptylix" path="res://scenes/grid.tscn" id="4_om7ue"]
 
-[node name="GameWindow" type="Node2D"]
+[node name="GameWindow" type="Node2D" unique_id=2094887660]
 
-[node name="Background" type="TextureRect" parent="."]
+[node name="Background" type="TextureRect" parent="." unique_id=2045723142]
 offset_right = 576.0
 offset_bottom = 1024.0
 texture = ExtResource("1_x8d5d")
 
-[node name="TopUI" type="TextureRect" parent="."]
+[node name="TopUI" type="TextureRect" parent="." unique_id=1360322036]
 offset_right = 40.0
 offset_bottom = 40.0
 texture = ExtResource("2_m87nl")
 
-[node name="ButtonUI" type="TextureRect" parent="."]
+[node name="ButtonUI" type="TextureRect" parent="." unique_id=921636823]
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
@@ -27,18 +27,23 @@ offset_bottom = 1020.0
 grow_vertical = 0
 texture = ExtResource("3_xxkr4")
 
-[node name="Grid" parent="." instance=ExtResource("4_om7ue")]
+[node name="Grid" parent="." unique_id=572233726 instance=ExtResource("4_om7ue")]
 x_start = 64
 y_start = 800
 offset = 64
 
-[node name="DestroyTimer" type="Timer" parent="."]
+[node name="DestroyTimer" type="Timer" parent="." unique_id=1354518605]
 wait_time = 0.5
 one_shot = true
 
-[node name="CollapseTimer" type="Timer" parent="."]
+[node name="CollapseTimer" type="Timer" parent="." unique_id=1702489104]
+wait_time = 0.5
+one_shot = true
+
+[node name="RefillTimer" type="Timer" parent="." unique_id=1818756319]
 wait_time = 0.5
 one_shot = true
 
 [connection signal="timeout" from="DestroyTimer" to="Grid" method="_on_destroy_timer_timeout"]
 [connection signal="timeout" from="CollapseTimer" to="Grid" method="_on_collapse_timer_timeout"]
+[connection signal="timeout" from="RefillTimer" to="Grid" method="_on_refill_timer_timeout"]

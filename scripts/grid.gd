@@ -158,12 +158,28 @@ func collapse_columns():
 						break
 	# recursively find new matches until no more matches are found
 	find_matches()
+	get_parent().get_node("RefillTimer").start()
+
+func refill_columns():
+	for i in width:
+		for j in height:
+			if all_pieces[i][j] == null:
+				var rand
+				var a = PieceColor.PieceColor.values()
+				a.shuffle()
+				while a.size() > 0:
+					rand = a.pop_front()
+					if match_at(i, j, rand) == false:
+						break
+				var piece = possible_pieces[rand].instantiate()
+				add_child(piece)
+				piece.set_position(grid_to_pixel(i, j))
+				all_pieces[i][j] = piece
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	all_pieces = make_2d_array()
 	spawn_pieces()
-
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
@@ -172,6 +188,8 @@ func _process(delta: float) -> void:
 func _on_destroy_timer_timeout() -> void:
 	destroy_matched()
 
-
 func _on_collapse_timer_timeout() -> void:
 	collapse_columns()
+
+func _on_refill_timer_timeout() -> void:
+	refill_columns()
