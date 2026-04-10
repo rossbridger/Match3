@@ -10,11 +10,20 @@ var state
 @export var x_start: int
 @export var y_start: int
 @export var offset: int
+@export var y_offset: int
 
 var all_pieces: Array[Array]
+
+#swap back
+var piece_one = null
+var piece_two = null
+var last_place := Vector2(0, 0)
+var last_direction := Vector2(0, 0)
+
 var first_touch: Vector2 = Vector2(0, 0)
 var final_touch: Vector2 = Vector2(0, 0)
 var controlling: bool = false
+var move_checked: bool = false
 
 @onready var possible_pieces = {
 	PieceColor.PieceColor.blue: preload("res://scenes/blue_piece.tscn"),
@@ -95,12 +104,28 @@ func swap_pieces(column, row, direction):
 	var first_piece: Piece = all_pieces[column][row]
 	var other_piece: Piece = all_pieces[column + direction.x][row + direction.y]
 	if first_piece != null && other_piece != null:
+		store_info(first_piece, other_piece, Vector2(column, row), direction)
 		state = wait
 		all_pieces[column][row] = other_piece
 		all_pieces[column + direction.x][row + direction.y] = first_piece
 		first_piece.move(grid_to_pixel(column + direction.x, row + direction.y))
 		other_piece.move(grid_to_pixel(column, row))
-		find_matches()
+		if !move_checked:
+			find_matches()
+
+func store_info(first_piece, other_piece, place, direction):
+	piece_one = first_piece
+	piece_two = other_piece
+	last_place = place
+	last_direction = direction
+
+func swap_back():
+	# Move the previously swapped pieces back to the previous place
+	if piece_one != null && piece_two != null:
+		swap_pieces(last_place.x, last_place.y, last_direction)
+	state = move
+	move_checked = false
+	pass
 
 func touch_difference(grid_1, grid_2):
 	var difference = grid_2 - grid_1
@@ -143,13 +168,19 @@ func find_matches():
 	$"../DestroyTimer".start()
 
 func destroy_matched():
+	var was_matched = false
 	for i in width:
 		for j in height:
 			if all_pieces[i][j] != null:
 				if all_pieces[i][j].matched:
+					was_matched = true
 					all_pieces[i][j].queue_free()
 					all_pieces[i][j] = null
-					$"../CollapseTimer".start()
+	move_checked = true
+	if was_matched:
+		$"../CollapseTimer".start()
+	else:
+		swap_back()
 
 func collapse_columns():
 	for i in width:
@@ -191,6 +222,7 @@ func after_refill():
 					$"../DestroyTimer".start()
 					break
 	state = move
+	move_checked = false
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
