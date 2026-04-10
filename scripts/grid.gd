@@ -1,5 +1,9 @@
 extends Node2D
 
+# state machine
+enum { wait, move }
+var state
+
 @export_category("Grid Variables")
 @export var width: int
 @export var height: int
@@ -91,6 +95,7 @@ func swap_pieces(column, row, direction):
 	var first_piece: Piece = all_pieces[column][row]
 	var other_piece: Piece = all_pieces[column + direction.x][row + direction.y]
 	if first_piece != null && other_piece != null:
+		state = wait
 		all_pieces[column][row] = other_piece
 		all_pieces[column + direction.x][row + direction.y] = first_piece
 		first_piece.move(grid_to_pixel(column + direction.x, row + direction.y))
@@ -158,7 +163,7 @@ func collapse_columns():
 						break
 	# recursively find new matches until no more matches are found
 	find_matches()
-	get_parent().get_node("RefillTimer").start()
+	$"../RefillTimer".start()
 
 func refill_columns():
 	for i in width:
@@ -175,15 +180,29 @@ func refill_columns():
 				add_child(piece)
 				piece.set_position(grid_to_pixel(i, j))
 				all_pieces[i][j] = piece
+	after_refill()
+
+func after_refill():
+	for i in width:
+		for j in height:
+			if all_pieces[i][j] != null:
+				if match_at(i, j, all_pieces[i][j].color):
+					find_matches()
+					$"../DestroyTimer".start()
+					break
+	state = move
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	state = move
+	randomize()
 	all_pieces = make_2d_array()
 	spawn_pieces()
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
-	touch_input()
+	if state == move:
+		touch_input()
 
 func _on_destroy_timer_timeout() -> void:
 	destroy_matched()
